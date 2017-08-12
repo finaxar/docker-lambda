@@ -14,3 +14,22 @@ RUN rm -rf /var/runtime /var/lang && \
   cd .. && \
   rm -rf Python-3.6.1 && \
   pip3 install awscli --no-cache-dir
+
+RUN yum -y update && \
+    yum -y install sudo openssh-server g++ gcc glibc-devel make && \
+    yum clean all && \
+    sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config && \
+    sed -ri 's/#UsePAM no/UsePAM no/g' /etc/ssh/sshd_config && \
+    echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+    useradd -u 1000 -G users,wheel -d /home/user --shell /bin/bash -m user && \
+    usermod -p "*" user && \
+    sed -i 's/requiretty/!requiretty/g' /etc/sudoers && \
+    mkdir /projects && chown -R user:user /projects
+
+EXPOSE 8080 
+
+WORKDIR /projects
+
+USER user
+
+CMD tailf /dev/null
